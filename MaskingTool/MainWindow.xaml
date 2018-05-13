@@ -8,6 +8,9 @@
         Title="マスキングツール" Height="450" Width="800"
         Loaded="Window_Loaded">
     <DockPanel Margin="10">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="マスク編集" Click="EditMaskMenuItem_Click"></MenuItem>
+        </Menu>
         <StackPanel DockPanel.Dock="Bottom" Margin="5">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Name="ExecuteButton" Padding="10,5" Width="200" Margin="0,0,10,0" Click="ExecuteButton_Click">実行</Button>

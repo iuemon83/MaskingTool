@@ -13,7 +13,7 @@ namespace MaskingTool
     /// SettingMasksDialog.xaml の相互作用ロジック
     /// マスキング箇所の設定画面
     /// </summary>
-    public partial class SettingMasksDialog : Window
+    public partial class EditMasksDialog : Window
     {
         /// <summary>
         /// 現在編集中のマスク
@@ -38,7 +38,7 @@ namespace MaskingTool
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public SettingMasksDialog()
+        public EditMasksDialog()
         {
             InitializeComponent();
         }

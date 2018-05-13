@@ -147,10 +147,16 @@ namespace MaskingTool
         /// <param name="e"></param>
         private void PreviewButton_Click(object sender, RoutedEventArgs e)
         {
-            new SettingMasksDialog()
+            this.viewmodel.ShowPreview();
+        }
+
+        private void EditMaskMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            new EditMasksDialog()
             {
                 Owner = this
-            }.ShowDialog();
+            }
+            .ShowDialog();
         }
     }
 }
