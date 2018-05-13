@@ -150,6 +150,11 @@ namespace MaskingTool
             this.viewmodel.ShowPreview();
         }
 
+        /// <summary>
+        /// マスク編集画面表示ボタンのクリックイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void EditMaskMenuItem_Click(object sender, RoutedEventArgs e)
         {
             new EditMasksDialog()

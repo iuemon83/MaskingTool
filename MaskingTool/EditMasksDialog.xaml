@@ -5,19 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MaskingTool"
         mc:Ignorable="d"
-        Title="マスク箇所の設定" Height="450" Width="800"
+        Title="無題 - マスク編集" Height="450" Width="800"
         Loaded="Window_Loaded">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="ファイル">
                 <MenuItem Header="画像を開く" Click="ChoiseImageMenuItem_Click"></MenuItem>
                 <MenuItem Header="マスクCSVを開く" Click="ChoiseCsvMenuItem_Click"></MenuItem>
+                <MenuItem Header="マスクCSVを上書き保存" Click="OverwriteCsvButton_Click"></MenuItem>
+                <MenuItem Header="マスクCSVを名前を付けて保存保存" Click="SaveNewCsvButton_Click"></MenuItem>
             </MenuItem>
         </Menu>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="10" HorizontalAlignment="Right">
-            <Button Padding="5" Width="100" Margin="0,0,30,0" Click="SaveButton_Click">保存</Button>
-            <Button Padding="5" Width="100" Click="CancelButton_Click">キャンセル</Button>
-        </StackPanel>
         <Grid>
             <Image Name="image" VerticalAlignment="Top" HorizontalAlignment="Left"
                    Stretch="Uniform"></Image>

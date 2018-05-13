@@ -100,11 +100,42 @@ namespace MaskingTool
         }
 
         /// <summary>
-        /// 保存ボタンのクリックイベント
+        /// マスクCSV 上書き保存ボタンのクリックイベント
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private void OverwriteCsvButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!File.Exists(this.maskCsvFilePath))
+            {
+                this.SaveNewCsv();
+                return;
+            }
+
+            var mat = new OpenCvSharp.Mat(this.imageFilePath);
+
+            var rows = this.masks
+                .Select(mask =>
+                {
+                    return mask.Points
+                        .Select(p => new Point(p.X * mat.Width / this.image.ActualWidth, p.Y * mat.Height / this.image.ActualHeight));
+                })
+                .Select(points => string.Join(",", points.Select(p => $"{p.X} {p.Y}")));
+
+            File.WriteAllLines(this.maskCsvFilePath, rows);
+        }
+
+        /// <summary>
+        /// マスクCSV 名前を付けて保存ボタンのクリックイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveNewCsvButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.SaveNewCsv();
+        }
+
+        private void SaveNewCsv()
         {
             var mat = new OpenCvSharp.Mat(this.imageFilePath);
 
@@ -116,9 +147,17 @@ namespace MaskingTool
                 })
                 .Select(points => string.Join(",", points.Select(p => $"{p.X} {p.Y}")));
 
-            File.WriteAllLines("mask.csv", rows);
+            var dialog = new CommonSaveFileDialog()
+            {
+                Title = "名前を付けて保存",
+                DefaultFileName = "mask.csv"
+            };
 
-            this.Close();
+            if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+
+            File.WriteAllLines(dialog.FileName, rows);
+            this.maskCsvFilePath = dialog.FileName;
+            this.Title = $"{System.IO.Path.GetFileName(this.maskCsvFilePath)} - マスク編集";
         }
 
         /// <summary>
@@ -136,8 +175,7 @@ namespace MaskingTool
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                this.imageFilePath = dialog.FileName;
-                this.SetImage(this.imageFilePath);
+                this.SetImage(dialog.FileName);
             }
         }
 
@@ -156,8 +194,7 @@ namespace MaskingTool
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                this.maskCsvFilePath = dialog.FileName;
-                this.SetMaskCsv(this.maskCsvFilePath);
+                this.SetMaskCsv(dialog.FileName);
             }
         }
 
@@ -168,6 +205,8 @@ namespace MaskingTool
         private void SetImage(string filePath)
         {
             if (!File.Exists(filePath)) return;
+
+            this.imageFilePath = filePath;
 
             var mat = new OpenCvSharp.Mat(filePath);
             var bitmap = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(mat);
@@ -193,6 +232,9 @@ namespace MaskingTool
         private void SetMaskCsv(string filePath)
         {
             if (!File.Exists(filePath)) return;
+
+            this.maskCsvFilePath = filePath;
+            this.Title = $"{System.IO.Path.GetFileName(filePath)} - マスク編集";
 
             this.maskCanvas.Children.Clear();
             this.masks.Clear();
