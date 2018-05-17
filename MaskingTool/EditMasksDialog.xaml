@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MaskingTool"
         mc:Ignorable="d"
-        Title="無題 - マスク編集" Height="450" Width="800"
+        Title="{Binding WindowTitle.Value}" Height="450" Width="800"
         Loaded="Window_Loaded">
+    <Window.Resources>
+        <local:MaskPointsConverter x:Key="maskPointsConverter"  />
+    </Window.Resources>
+    
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="ファイル">
@@ -18,14 +22,27 @@
         </Menu>
         <Grid>
             <Image Name="image" VerticalAlignment="Top" HorizontalAlignment="Left"
-                   Stretch="Uniform"></Image>
-            <Canvas Name="maskCanvas"
-                    HorizontalAlignment="Left" VerticalAlignment="Top"
-                    Width="{Binding ElementName=image, Path=ActualWidth, Mode=OneWay}"
-                    Height="{Binding ElementName=image, Path=ActualHeight, Mode=OneWay}"
-                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-                    MouseRightButtonDown="Canvas_MouseRightButtonDown"
-                    Background="Transparent"></Canvas>
+                   Stretch="Uniform"
+                   Source="{Binding ImageSource.Value}"></Image>
+            <ItemsControl Name="maskCanvas" ItemsSource="{Binding Masks}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas
+                            HorizontalAlignment="Left" VerticalAlignment="Top"
+                            Width="{Binding ElementName=image, Path=ActualWidth, Mode=OneWay}"
+                            Height="{Binding ElementName=image, Path=ActualHeight, Mode=OneWay}"
+                            MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                            MouseRightButtonDown="Canvas_MouseRightButtonDown"
+                            Background="Transparent"></Canvas>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Polygon Points="{Binding Points, Converter={StaticResource maskPointsConverter}}" Fill="Black">
+                        </Polygon>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </DockPanel>
 </Window>
