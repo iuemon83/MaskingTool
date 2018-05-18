@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Reactive.Bindings;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -43,6 +44,11 @@ namespace MaskingTool
         /// 頂点の一覧
         /// </summary>
         public ObservableCollection<Point> Points { get; } = new ObservableCollection<Point>();
+
+        /// <summary>
+        /// 編集中である場合はTrue、そうでなければFalse
+        /// </summary>
+        public ReactiveProperty<bool> IsEditing { get; } = new ReactiveProperty<bool>();
 
         /// <summary>
         /// コンストラクタ

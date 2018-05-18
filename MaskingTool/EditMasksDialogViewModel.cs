@@ -64,7 +64,7 @@ namespace MaskingTool
         /// </summary>
         public EditMasksDialogViewModel()
         {
-            this.EditingMask = this.CreateNewMask();
+            this.CreateNewEditMask();
 
             this.WindowTitle = this.MaskCsvFilePath
                 .Select(filePath =>
@@ -84,7 +84,7 @@ namespace MaskingTool
         /// <param name="point"></param>
         public void AddNewVertex(Point point)
         {
-            if (this.EditingMask == null) this.EditingMask = this.CreateNewMask();
+            if (this.EditingMask == null) this.CreateNewEditMask();
 
             this.EditingMask.AddVertex(point);
         }
@@ -97,22 +97,23 @@ namespace MaskingTool
             // マスクが3点以上で構成されるなら保存
             if ((this.EditingMask?.Points.Count ?? 0) > 2)
             {
-                this.EditingMask = this.CreateNewMask();
+                this.EditingMask.IsEditing.Value = false;
+                this.CreateNewEditMask();
             }
         }
 
         /// <summary>
-        /// 新たなマスクを作成します。
+        /// 新たな編集用のマスクを作成します。
         /// </summary>
         /// <param name="points"></param>
         /// <returns></returns>
-        private Mask CreateNewMask(params Point[] points)
+        private void CreateNewEditMask(params Point[] points)
         {
             var mask = new Mask(points);
+            mask.IsEditing.Value = true;
 
             this.Masks.Add(mask);
-
-            return mask;
+            this.EditingMask = mask;
         }
 
         /// <summary>

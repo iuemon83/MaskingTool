@@ -38,7 +38,19 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Polygon Points="{Binding Points, Converter={StaticResource maskPointsConverter}}" Fill="Black">
+                        <Polygon Points="{Binding Points, Converter={StaticResource maskPointsConverter}}">
+                            <Polygon.Style>
+                                <Style TargetType="Polygon">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEditing.Value}" Value="True">
+                                            <Setter Property="Fill" Value="Orange"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsEditing.Value}" Value="False">
+                                            <Setter Property="Fill" Value="Black"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Polygon.Style>
                         </Polygon>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
