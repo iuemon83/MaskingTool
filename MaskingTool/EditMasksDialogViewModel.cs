@@ -202,6 +202,8 @@ namespace MaskingTool
 
             if (!File.Exists(ImageFilePath)) return;
 
+            this.Masks.Clear();
+
             var image = new OpenCvSharp.Mat(this.ImageFilePath);
             var imageSize = this.GetImageCanvasSize();
             var csvRows = File.ReadAllLines(filePath);
