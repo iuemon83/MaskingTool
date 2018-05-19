@@ -85,8 +85,10 @@ namespace MaskingTool
                     Size result;
                     if (File.Exists(filePath))
                     {
-                        var mat = new OpenCvSharp.Mat(filePath);
-                        result = new Size(mat.Width, mat.Height);
+                        using (var mat = new OpenCvSharp.Mat(filePath))
+                        {
+                            result = new Size(mat.Width, mat.Height);
+                        }
                     }
                     else
                     {
@@ -195,10 +197,9 @@ namespace MaskingTool
         /// <param name="filePath"></param>
         private void SaveMaskCsv(string filePath)
         {
-            var mat = new OpenCvSharp.Mat(this.ImageFilePath.Value);
             var canvasSize = this.canvasSizeCache.Value;
 
-            var rows = this.Masks.Select(mask => mask.ToCsv(mat, canvasSize));
+            var rows = this.Masks.Select(mask => mask.ToCsv(canvasSize));
 
             File.WriteAllLines(filePath, rows);
             this.MaskCsvFilePath.Value = filePath;
@@ -214,9 +215,8 @@ namespace MaskingTool
 
             this.ImageFilePath.Value = filePath;
 
-            var mat = new OpenCvSharp.Mat(filePath);
-            var bitmap = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(mat);
-
+            using (var mat = new OpenCvSharp.Mat(filePath))
+            using (var bitmap = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(mat))
             using (var memory = new MemoryStream())
             {
                 bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);

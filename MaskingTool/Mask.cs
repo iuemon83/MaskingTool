@@ -168,10 +168,9 @@ namespace MaskingTool
         /// <summary>
         /// CSV データへ変換します。
         /// </summary>
-        /// <param name="image"></param>
         /// <param name="canvasSize"></param>
         /// <returns></returns>
-        public string ToCsv(OpenCvSharp.Mat image, Size canvasSize)
+        public string ToCsv(Size canvasSize)
         {
             return string.Join(",", this.PixelPoints
                 .Select(point => $"{point.X} {point.Y}"));
