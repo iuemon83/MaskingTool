@@ -34,7 +34,8 @@ namespace MaskingTool
                         DefaultFileName = "mask.csv"
                     };
 
-                    return (dialog.ShowDialog() == CommonFileDialogResult.Ok, dialog.FileName);
+                    var isOk = dialog.ShowDialog() == CommonFileDialogResult.Ok;
+                    return (isOk, isOk ? dialog.FileName : "");
                 });
         }
 
