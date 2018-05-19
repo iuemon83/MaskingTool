@@ -12,19 +12,7 @@ namespace MaskingTool
         /// <summary>
         /// ビューモデル
         /// </summary>
-        private readonly EditMasksDialogViewModel viewmodel = new EditMasksDialogViewModel()
-        {
-            ConfirmNewSaveMaskCsvFile = () =>
-            {
-                var dialog = new CommonSaveFileDialog()
-                {
-                    Title = "名前を付けて保存",
-                    DefaultFileName = "mask.csv"
-                };
-
-                return (dialog.ShowDialog() == CommonFileDialogResult.Ok, dialog.FileName);
-            },
-        };
+        private readonly EditMasksDialogViewModel viewmodel;
 
         /// <summary>
         /// コンストラクタ
@@ -32,6 +20,22 @@ namespace MaskingTool
         public EditMasksDialog()
         {
             InitializeComponent();
+
+            this.viewmodel = new EditMasksDialogViewModel(
+                getImageCanvasSize: () =>
+                {
+                    return new Size(this.image.ActualWidth, this.image.ActualHeight);
+                },
+                confirmNewSaveMaskCsvFile: () =>
+                {
+                    var dialog = new CommonSaveFileDialog()
+                    {
+                        Title = "名前を付けて保存",
+                        DefaultFileName = "mask.csv"
+                    };
+
+                    return (dialog.ShowDialog() == CommonFileDialogResult.Ok, dialog.FileName);
+                });
         }
 
         /// <summary>
@@ -41,11 +45,6 @@ namespace MaskingTool
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.viewmodel.GetImageCanvasSize = () =>
-            {
-                return new Size(this.image.ActualWidth, this.image.ActualHeight);
-            };
-
             this.DataContext = this.viewmodel;
         }
 
@@ -108,7 +107,7 @@ namespace MaskingTool
             var dialog = new CommonOpenFileDialog()
             {
                 IsFolderPicker = false,
-                DefaultFileName = this.viewmodel.ImageFilePath
+                DefaultFileName = this.viewmodel.ImageFilePath.Value
             };
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
@@ -134,6 +133,16 @@ namespace MaskingTool
             {
                 this.viewmodel.SetMaskCsv(dialog.FileName);
             }
+        }
+
+        /// <summary>
+        /// 画像のリサイズイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Image_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.viewmodel?.UpdateCanvasSize();
         }
     }
 }

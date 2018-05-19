@@ -8,7 +8,7 @@
         Title="{Binding WindowTitle.Value}" Height="450" Width="800"
         Loaded="Window_Loaded">
     <Window.Resources>
-        <local:MaskPointsConverter x:Key="maskPointsConverter"  />
+        <local:MaskPointsConverter x:Key="maskPointsConverter"/>
     </Window.Resources>
     
     <DockPanel>
@@ -23,7 +23,8 @@
         <Grid>
             <Image Name="image" VerticalAlignment="Top" HorizontalAlignment="Left"
                    Stretch="Uniform"
-                   Source="{Binding ImageSource.Value}"></Image>
+                   Source="{Binding ImageSource.Value}"
+                   SizeChanged="Image_SizeChanged"></Image>
             <ItemsControl Name="maskCanvas" ItemsSource="{Binding Masks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -38,7 +39,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Polygon Points="{Binding Points, Converter={StaticResource maskPointsConverter}}">
+                        <Polygon Points="{Binding CanvasPoints, Converter={StaticResource maskPointsConverter}}">
                             <Polygon.Style>
                                 <Style TargetType="Polygon">
                                     <Style.Triggers>

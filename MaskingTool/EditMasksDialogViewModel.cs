@@ -22,17 +22,17 @@ namespace MaskingTool
         /// マスクCSV ファイルを新規に保存するかを尋ねます。
         /// 保存するかどうかと、ファイル名を返します。
         /// </summary>
-        public Func<(bool, string)> ConfirmNewSaveMaskCsvFile { get; set; }
+        private readonly Func<(bool, string)> confirmNewSaveMaskCsvFile;
 
         /// <summary>
         /// 画像描画箇所のサイズを取得します。
         /// </summary>
-        public Func<Size> GetImageCanvasSize { get; set; }
+        private readonly Func<Size> getImageCanvasSize;
 
         /// <summary>
         /// 現在編集中のマスク
         /// </summary>
-        private Mask EditingMask { get; set; } = new Mask();
+        private Mask EditingMask;
 
         /// <summary>
         /// マスクの一覧
@@ -57,14 +57,50 @@ namespace MaskingTool
         /// <summary>
         /// 開いているCSV ファイルのパス
         /// </summary>
-        public string ImageFilePath { get; private set; }
+        public ReactiveProperty<string> ImageFilePath = new ReactiveProperty<string>();
+
+        /// <summary>
+        /// キャンバスサイズのキャッシュ
+        /// </summary>
+        private Lazy<Size> canvasSizeCache;
+
+        /// <summary>
+        /// 画像サイズのキャッシュ
+        /// </summary>
+        private readonly ReactiveProperty<Size> imageSizeCache;
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public EditMasksDialogViewModel()
+        public EditMasksDialogViewModel(Func<Size> getImageCanvasSize, Func<(bool, string)> confirmNewSaveMaskCsvFile)
         {
-            this.CreateNewEditMask();
+            this.getImageCanvasSize = getImageCanvasSize;
+            this.confirmNewSaveMaskCsvFile = confirmNewSaveMaskCsvFile;
+
+            this.UpdateCanvasSize();
+
+            this.imageSizeCache = this.ImageFilePath
+                .Select(filePath =>
+                {
+                    Size result;
+                    if (File.Exists(filePath))
+                    {
+                        var mat = new OpenCvSharp.Mat(filePath);
+                        result = new Size(mat.Width, mat.Height);
+                    }
+                    else
+                    {
+                        result = new Size();
+                    }
+
+                    foreach (var mask in this.Masks)
+                    {
+                        mask.ImageSize = result;
+                    }
+
+                    return result;
+                })
+                .ToReactiveProperty();
 
             this.WindowTitle = this.MaskCsvFilePath
                 .Select(filePath =>
@@ -76,17 +112,20 @@ namespace MaskingTool
                     return $"{fileName} - マスク編集";
                 })
                 .ToReactiveProperty("");
+
+            this.CreateNewEditMask();
         }
 
         /// <summary>
         /// マスクに新たな頂点を追加します。
         /// </summary>
         /// <param name="point"></param>
-        public void AddNewVertex(Point point)
+        public void AddNewVertex(Point canvasPoint)
         {
             if (this.EditingMask == null) this.CreateNewEditMask();
 
-            this.EditingMask.AddVertex(point);
+            var pixelPoint = Mask.CanvasToPixelPoint(canvasPoint, this.imageSizeCache.Value, this.canvasSizeCache.Value);
+            this.EditingMask.AddVertex(pixelPoint);
         }
 
         /// <summary>
@@ -95,7 +134,7 @@ namespace MaskingTool
         public void SaveEditingMask()
         {
             // マスクが3点以上で構成されるなら保存
-            if ((this.EditingMask?.Points.Count ?? 0) > 2)
+            if (this.EditingMask?.IsValidGeometry ?? false)
             {
                 this.EditingMask.IsEditing.Value = false;
                 this.CreateNewEditMask();
@@ -109,7 +148,7 @@ namespace MaskingTool
         /// <returns></returns>
         private void CreateNewEditMask(params Point[] points)
         {
-            var mask = new Mask(points);
+            var mask = new Mask(points, this.imageSizeCache.Value, this.canvasSizeCache.Value);
             mask.IsEditing.Value = true;
 
             this.Masks.Add(mask);
@@ -143,7 +182,7 @@ namespace MaskingTool
         /// </summary>
         public void SaveNewMaskCsv()
         {
-            var (allowed, filePath) = this.ConfirmNewSaveMaskCsvFile();
+            var (allowed, filePath) = this.confirmNewSaveMaskCsvFile();
             if (!allowed) return;
 
             this.SaveMaskCsv(filePath);
@@ -156,10 +195,10 @@ namespace MaskingTool
         /// <param name="filePath"></param>
         private void SaveMaskCsv(string filePath)
         {
-            var mat = new OpenCvSharp.Mat(this.ImageFilePath);
-            var imageSize = this.GetImageCanvasSize();
+            var mat = new OpenCvSharp.Mat(this.ImageFilePath.Value);
+            var canvasSize = this.canvasSizeCache.Value;
 
-            var rows = this.Masks.Select(mask => mask.ToCsv(mat, imageSize));
+            var rows = this.Masks.Select(mask => mask.ToCsv(mat, canvasSize));
 
             File.WriteAllLines(filePath, rows);
             this.MaskCsvFilePath.Value = filePath;
@@ -173,7 +212,7 @@ namespace MaskingTool
         {
             if (!File.Exists(filePath)) return;
 
-            this.ImageFilePath = filePath;
+            this.ImageFilePath.Value = filePath;
 
             var mat = new OpenCvSharp.Mat(filePath);
             var bitmap = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(mat);
@@ -200,18 +239,32 @@ namespace MaskingTool
         {
             if (!File.Exists(filePath)) return;
 
-            if (!File.Exists(ImageFilePath)) return;
+            if (!File.Exists(this.ImageFilePath.Value)) return;
 
+            this.MaskCsvFilePath.Value = filePath;
             this.Masks.Clear();
 
-            var image = new OpenCvSharp.Mat(this.ImageFilePath);
-            var imageSize = this.GetImageCanvasSize();
+            var imageSize = this.imageSizeCache.Value;
+            var canvasSize = this.canvasSizeCache.Value;
             var csvRows = File.ReadAllLines(filePath);
 
-            var masks = Mask.FromCsv(csvRows, image, imageSize);
+            var masks = Mask.FromCsv(csvRows, imageSize, canvasSize);
             foreach (var mask in masks)
             {
                 this.Masks.Add(mask);
+            }
+        }
+
+        /// <summary>
+        /// キャンバスサイズを更新します。
+        /// </summary>
+        public void UpdateCanvasSize()
+        {
+            this.canvasSizeCache = new Lazy<Size>(() => this.getImageCanvasSize?.Invoke() ?? default);
+
+            foreach (var mask in this.Masks)
+            {
+                mask.CanvasSize = this.canvasSizeCache.Value;
             }
         }
     }

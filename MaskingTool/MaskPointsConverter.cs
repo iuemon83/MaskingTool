@@ -13,14 +13,16 @@ namespace MaskingTool
         public object Convert(object value, System.Type targetType, object parameter
                               , System.Globalization.CultureInfo culture)
         {
-
-            if (value.GetType() == typeof(ObservableCollection<Point>)
+            if (value is ObservableCollection<Point> points
                 && targetType == typeof(PointCollection))
             {
 
                 var pointCollection = new PointCollection();
-                foreach (var point in value as ObservableCollection<Point>)
+                foreach (var point in points)
+                {
                     pointCollection.Add(point);
+                }
+
                 return pointCollection;
             }
             return null;
