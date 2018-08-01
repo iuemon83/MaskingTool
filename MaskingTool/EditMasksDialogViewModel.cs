@@ -121,7 +121,7 @@ namespace MaskingTool
         /// <summary>
         /// マスクに新たな頂点を追加します。
         /// </summary>
-        /// <param name="point"></param>
+        /// <param name="canvasPoint"></param>
         public void AddNewVertex(Point canvasPoint)
         {
             if (this.EditingMask == null) this.CreateNewEditMask();

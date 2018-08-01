@@ -18,7 +18,7 @@ namespace MaskingTool
         /// CSV データからマスクを作成します。
         /// </summary>
         /// <param name="csvData"></param>
-        /// <param name="image"></param>
+        /// <param name="imageSize"></param>
         /// <param name="canvasSize"></param>
         /// <returns></returns>
         public static IEnumerable<Mask> FromCsv(IEnumerable<string> csvData, Size imageSize, Size canvasSize)
@@ -132,6 +132,8 @@ namespace MaskingTool
         /// 頂点を指定してインスタンスを初期化
         /// </summary>
         /// <param name="pixelPoints"></param>
+        /// <param name="imageSize"></param>
+        /// <param name="canvasSize"></param>
         public Mask(IEnumerable<Point> pixelPoints, Size imageSize, Size canvasSize)
         {
             this.ImageSize = imageSize;

@@ -13,10 +13,30 @@ namespace MaskingTool
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// 元となる画像フォルダーのパス
+        /// </summary>
         public ReactiveProperty<string> SrcFolderPath { get; } = new ReactiveProperty<string>();
+
+        /// <summary>
+        /// マスク処理後の画像を出力するフォルダーのパス
+        /// </summary>
         public ReactiveProperty<string> DistFolderPath { get; } = new ReactiveProperty<string>();
+
+        /// <summary>
+        /// ファイルを検索するためのパターン文字列
+        /// </summary>
         public ReactiveProperty<string> FileNamePattern { get; } = new ReactiveProperty<string>();
+
+        /// <summary>
+        /// マスク情報が記録されたCSV ファイルのパス
+        /// </summary>
         public ReactiveProperty<string> MaskCsvFilePath { get; } = new ReactiveProperty<string>();
+
+        /// <summary>
+        /// 出力先のフォルダーをユーザーに確認します。
+        /// 承諾された場合にはTrue、そうでなければFalse を取得します。
+        /// </summary>
         public Func<bool> ConfirmDistFolder { get; set; }
 
         /// <summary>
